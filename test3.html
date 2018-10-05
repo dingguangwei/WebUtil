@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.3&;key=38c9d7969406ea48ab2c83a37e4137ab"></script>
+    <title>异步加载地图</title>
+    <link rel="stylesheet" href="https://cache.amap.com/lbs/static/main1119.css"/>
+</head>
+<body>
+    <div>
+        <input type="file" multiple>
+        <input id ="clear" type="button" value='clear'>
+        <input id ="run" type="button" value='run'>
+        <input id = "file-upload" type="button" value="file-upload">
+
+        <div id="container" style="height:800px; top:80px; left:50px; right:50px;"></div>
+    </div>
+<script>
+    
+    function onApiLoaded(){
+        var map = new AMap.Map('container', {
+            center: [116.403999, 39.914668],
+            zoom: 10
+        });
+        map.plugin(["AMap.ToolBar"], function() {
+            map.addControl(new AMap.ToolBar());
+        });
+
+        data = {
+            "lat":[39.7, 39.8, 39.9],
+            "lon":[116.5, 116.4, 116.7]
+        };
+        var lineArr = new Array();
+        for(var i=0;i<data.lat.length;i++){
+            lineArr.push(new AMap.LngLat(data.lon[i],data.lat[i]));
+        }
+        var polyline =new AMap.Polyline({
+            path: lineArr,
+            strokeColor: "dark",
+            strokeOpacity: 0.5,
+            strokeWeight: 3, 
+            strokeStyle: "solid",
+        });
+        polyline.setMap(map);
+    }
+    $(document).ready(function(){
+        $('#clear').on('click', (function(){
+            map.clearMap();
+        }));
+        $('#file-upload').on('change', function(){
+            var map = new AMap.Map('container', {
+                center: [116.403999, 39.914668],
+                zoom: 10
+            });
+            for(var i=0,f;f=this.files[i];i++){
+                var fPath = window.URL.createObjectURL(f);
+                $.getJSON(fPath, function(data){
+                    var lineArr = new Array();
+                    for(var i=0;i<data.lat.length;i++){
+                        lineArr.push(new AMap.LngLat(data.lon[i],data.lat[i]));
+                    }
+                    var polyline =new AMap.Polyline({
+                        path: lineArr,
+                        strokeColor: "#00ff00",
+                        strokeOpacity: 0.5,
+                        strokeWeight: 3, 
+                        strokeStyle: "solid",
+                    });
+                    polyline.setMap(map);
+                });
+            }
+        });
+        $('#run').on('click', (function(){
+            var url = 'https://webapi.amap.com/maps?v=1.4.10&key=38c9d7969406ea48ab2c83a37e4137ab&callback=onApiLoaded';
+            var jsapi = document.createElement('script');
+            jsapi.charset = 'utf-8';
+            jsapi.src = url;
+            document.head.appendChild(jsapi);
+        }));
+    });
+    
+</script>
+</body>
+</html>
